@@ -1,0 +1,24 @@
+name: Tokyo Seika Daily
+on:
+  schedule:
+    - cron: '15 0 * * *'   # 09:15 JST 入荷PDF
+    - cron: '20 1 * * *'   # 10:20 JST 相場PDF
+  workflow_dispatch: {}
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Run scraper
+        run: python scraper.py
+      - name: Commit results
+        run: |
+          git config user.name "auto-bot"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Daily update" || echo "No changes"
+          git push
